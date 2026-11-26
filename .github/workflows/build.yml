@@ -14,19 +14,28 @@ jobs:
       with:
         flutter-version: '3.13.0'
         channel: 'stable'
-    - name: Save Custom Files
-      run: |
-        mkdir -p /tmp/custom
-        cp -r android /tmp/custom/ || true
-        cp -r lib /tmp/custom/ || true
-        cp pubspec.yaml /tmp/custom/ || true
+        
+    # 1. Tạo dự án Flutter trước
     - name: Create Clean Project
       run: flutter create --project-name=menu_aim --org=com.sgcodexs .
+      
+    # 2. Ghi đè lại toàn bộ code của bhai vào dự án
     - name: Restore Custom Files
       run: |
-        cp -r /tmp/custom/android/* android/ || true
-        cp -r /tmp/custom/lib/* lib/ || true
-        cp /tmp/custom/pubspec.yaml . || true
+        cp lib/main.dart lib/main.dart
+        cp android/app/src/main/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+        cp android/app/src/main/res/xml/accessibility_service_config.xml android/app/src/main/res/xml/accessibility_service_config.xml
+        cp android/app/src/main/kotlin/com/sgcodexs/menuaim/MainActivity.kt android/app/src/main/kotlin/com/sgcodexs/menuaim/MainActivity.kt
+        cp android/app/src/main/kotlin/com/sgcodexs/menuaim/AimOverlayService.kt android/app/src/main/kotlin/com/sgcodexs/menuaim/AimOverlayService.kt
+        cp android/app/src/main/kotlin/com/sgcodexs/menuaim/TouchService.kt android/app/src/main/kotlin/com/sgcodexs/menuaim/TouchService.kt
+        cp android/app/src/main/kotlin/com/sgcodexs/menuaim/BridgeVpnService.kt android/app/src/main/kotlin/com/sgcodexs/menuaim/BridgeVpnService.kt
+
+    # 3. Tự động thêm dòng import Kotlin vào build.gradle
+    - name: Fix Android Config
+      run: |
+        echo "apply plugin: 'kotlin-android'" >> android/app/build.gradle
+        echo "dependencies { implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22' }" >> android/app/build.gradle
+
     - run: flutter pub get
     - run: flutter build apk --release
     - uses: actions/upload-artifact@v4
