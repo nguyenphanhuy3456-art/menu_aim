@@ -7,8 +7,6 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import android.view.WindowManager
-import android.app.ActivityManager
-import android.content.Context
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.sgcodexs.menuaim/native"
@@ -73,9 +71,8 @@ class MainActivity : FlutterActivity() {
                 "hideApp" -> {
                     val enable = call.argument<Boolean>("enable") ?: true
                     if (enable) {
+                        // Chỉ dùng FLAG_SECURE để chống chụp ảnh màn hình (an toàn, không bị lỗi build)
                         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-                        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                        activityManager.appTasks.forEach { it.setExclusionFromRecents(true) }
                     }
                     result.success(true)
                 }
