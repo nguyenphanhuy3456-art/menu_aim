@@ -18,7 +18,23 @@ jobs:
       with:
         flutter-version: '3.13.0'
         channel: 'stable'
-   - run: flutter create --project-name=menu_aim --org=com.sgcodexs .
+        
+    - name: Save custom Android and Lib files
+      run: |
+        mkdir -p /tmp/custom_files
+        cp -r android /tmp/custom_files/ || true
+        cp -r lib /tmp/custom_files/ || true
+        cp pubspec.yaml /tmp/custom_files/ || true
+        
+    - name: Create clean Flutter project
+      run: flutter create --project-name=menu_aim --org=com.sgcodexs .
+      
+    - name: Restore custom files
+      run: |
+        cp -r /tmp/custom_files/android/* android/ || true
+        cp -r /tmp/custom_files/lib/* lib/ || true
+        cp /tmp/custom_files/pubspec.yaml . || true
+        
     - run: flutter pub get
     - run: flutter build apk --release
     - uses: actions/upload-artifact@v3
