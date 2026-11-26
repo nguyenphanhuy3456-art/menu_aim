@@ -18,7 +18,7 @@ jobs:
       with:
         flutter-version: '3.13.0'
         channel: 'stable'
-    - run: flutter create .
+    - run: flutter create --project-name=menu_aim --org=com.sgcodexs .
     - run: flutter pub get
     - run: flutter build apk --release
     - uses: actions/upload-artifact@v3
