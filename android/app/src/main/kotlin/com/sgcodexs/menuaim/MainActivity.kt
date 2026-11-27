@@ -16,33 +16,30 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
-                "checkOverlayPermission" -> result.success(Settings.canDrawOverlays(this))
                 "requestOverlayPermission" -> {
-                    // Ép hệ thống mở bảng xin quyền Overlay
                     if (!Settings.canDrawOverlays(this)) {
                         val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
                         startActivity(intent)
                     }
                     result.success(true)
                 }
-                "startOverlay" -> {
-                    if (Settings.canDrawOverlays(this)) {
-                        startService(Intent(this, AimOverlayService::class.java))
-                        result.success(true)
-                    } else result.success(false)
-                }
-                "stopOverlay" -> {
-                    stopService(Intent(this, AimOverlayService::class.java))
-                    result.success(true)
-                }
                 "startVpn" -> {
-                    // Ép hệ thống hiện bảng xin quyền VPN
                     val prepareIntent = android.net.VpnService.prepare(this)
                     if (prepareIntent != null) {
                         startActivityForResult(prepareIntent, VPN_REQUEST_CODE)
                     } else {
-                        // Nếu đã có quyền thì chạy luôn
                         startService(Intent(this, BridgeVpnService::class.java))
+                    }
+                    result.success(true)
+                }
+                "openAccessibilitySettings" -> {
+                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                    startActivity(intent)
+                    result.success(true)
+                }
+                "startOverlay" -> {
+                    if (Settings.canDrawOverlays(this)) {
+                        startService(Intent(this, AimOverlayService::class.java))
                     }
                     result.success(true)
                 }
@@ -86,7 +83,6 @@ class MainActivity : FlutterActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        // Nếu người dùng bấm OK ở bảng xin quyền VPN thì khởi động Service
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             startService(Intent(this, BridgeVpnService::class.java))
         }
