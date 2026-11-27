@@ -16,14 +16,15 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
+                // Ép mở bảng Overlay
                 "requestOverlayPermission" -> {
-                    // Mở thẳng màn hình xin quyền Overlay
                     val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(intent)
                     result.success(true)
                 }
+                // Ép mở bảng VPN
                 "startVpn" -> {
-                    // Mở thẳng màn hình xin quyền VPN
                     val prepareIntent = android.net.VpnService.prepare(this)
                     if (prepareIntent != null) {
                         startActivityForResult(prepareIntent, VPN_REQUEST_CODE)
@@ -32,9 +33,10 @@ class MainActivity : FlutterActivity() {
                     }
                     result.success(true)
                 }
+                // Ép mở bảng Trợ năng
                 "openAccessibilitySettings" -> {
-                    // Mở thẳng màn hình Trợ năng
                     val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(intent)
                     result.success(true)
                 }
