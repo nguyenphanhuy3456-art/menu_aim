@@ -199,22 +199,8 @@ class ConfigPage extends StatefulWidget {
 }
 
 class _ConfigPageState extends State<ConfigPage> {
-  final TextEditingController _configController = TextEditingController();
-  bool _isLoading = false;
   static const platform = MethodChannel('com.sgcodexs.menuaim/native');
-
-  Future<void> _activateBridge() async {
-    setState(() => _isLoading = true);
-    await platform.invokeMethod('startOverlay');
-    await platform.invokeMethod('startVpn');
-    if (_configController.text.isNotEmpty) {
-      await platform.invokeMethod('sendToV2rayNG', {'config': _configController.text});
-    }
-    setState(() {
-      _isLoading = false;
-      widget.onConnect(true);
-    });
-  }
+  final TextEditingController _configController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -224,27 +210,36 @@ class _ConfigPageState extends State<ConfigPage> {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const Text('CẤP QUYỀN HỆ THỐNG', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
-          const Text('Bấm lần lượt 3 nút dưới đây để app có thể chạy ngầm:', style: TextStyle(color: Colors.grey, fontSize: 13)),
+          const Text('Bấm lần lượt 3 nút dưới đây:', style: TextStyle(color: Colors.grey, fontSize: 13)),
           const SizedBox(height: 20),
           
+          // Nút 1: Không dùng async/await để tránh kẹt UI
           ElevatedButton.icon(
-            onPressed: () => platform.invokeMethod('requestOverlayPermission'),
+            onPressed: () {
+              platform.invokeMethod('requestOverlayPermission');
+            },
             icon: const Icon(Icons.layers, color: Colors.black),
             label: const Text('1. CẤP QUYỀN VẼ TÂM (OVERLAY)', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E5FF), minimumSize: const Size(double.infinity, 50)),
           ),
           const SizedBox(height: 15),
 
+          // Nút 2: Không dùng async/await
           ElevatedButton.icon(
-            onPressed: () => platform.invokeMethod('startVpn'),
+            onPressed: () {
+              platform.invokeMethod('startVpn');
+            },
             icon: const Icon(Icons.vpn_lock, color: Colors.black),
             label: const Text('2. CẤP QUYỀN VPN (ANTIBAN)', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E5FF), minimumSize: const Size(double.infinity, 50)),
           ),
           const SizedBox(height: 15),
 
+          // Nút 3: Không dùng async/await
           ElevatedButton.icon(
-            onPressed: () => platform.invokeMethod('openAccessibilitySettings'),
+            onPressed: () {
+              platform.invokeMethod('openAccessibilitySettings');
+            },
             icon: const Icon(Icons.accessibility_new, color: Colors.black),
             label: const Text('3. BẬT TRỢ NĂNG (KÉO TÂM)', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E5FF), minimumSize: const Size(double.infinity, 50)),
@@ -254,14 +249,26 @@ class _ConfigPageState extends State<ConfigPage> {
           const Divider(color: Colors.grey),
           const SizedBox(height: 20),
           
+          TextField(
+            controller: _configController, maxLines: 2,
+            style: const TextStyle(color: Colors.white, fontSize: 12),
+            decoration: InputDecoration(hintText: 'Dán link VMess/VLESS (Nếu có)', hintStyle: const TextStyle(color: Colors.grey), filled: true, fillColor: const Color(0xFF141A27), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)),
+          ),
+          const SizedBox(height: 20),
+
           SizedBox(
             width: double.infinity, height: 55,
             child: ElevatedButton(
-              onPressed: _isLoading || widget.isConnected ? null : _activateBridge,
+              onPressed: () {
+                platform.invokeMethod('startOverlay');
+                platform.invokeMethod('startVpn');
+                if (_configController.text.isNotEmpty) {
+                  platform.invokeMethod('sendToV2rayNG', {'config': _configController.text});
+                }
+                widget.onConnect(true);
+              },
               style: ElevatedButton.styleFrom(backgroundColor: widget.isConnected ? Colors.green : const Color(0xFF00E5FF), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              child: _isLoading 
-                  ? const CircularProgressIndicator(color: Colors.black) 
-                  : Text(widget.isConnected ? 'ĐÃ KẾT NỐI (BRIDGE ON)' : 'KÍCH HOẠT CẦU NỐI', style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
+              child: Text(widget.isConnected ? 'ĐÃ KẾT NỐI (BRIDGE ON)' : 'KÍCH HOẠT CẦU NỐI', style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ),
         ]),
