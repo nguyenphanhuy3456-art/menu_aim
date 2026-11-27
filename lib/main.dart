@@ -199,23 +199,29 @@ class ConfigPage extends StatefulWidget {
 }
 
 class _ConfigPageState extends State<ConfigPage> {
-  final TextEditingController _configController = TextEditingController();
   bool _isLoading = false;
   static const platform = MethodChannel('com.sgcodexs.menuaim/native');
 
-  // Hàm 1: Chỉ xin quyền Overlay
-  Future<void> _requestOverlay() async {
-    await platform.invokeMethod('requestOverlayPermission');
+  void _requestOverlay() {
+    platform.invokeMethod('requestOverlayPermission');
   }
 
-  // Hàm 2: Chỉ xin quyền VPN
-  Future<void> _requestVpn() async {
+  void _requestVpn() {
+    platform.invokeMethod('startVpn');
+  }
+
+  void _openAccessibility() {
+    platform.invokeMethod('openAccessibilitySettings');
+  }
+
+  Future<void> _activateAll() async {
+    setState(() => _isLoading = true);
+    await platform.invokeMethod('startOverlay');
     await platform.invokeMethod('startVpn');
-  }
-
-  // Hàm 3: Chỉ mở cài đặt Trợ năng
-  Future<void> _openAccessibility() async {
-    await platform.invokeMethod('openAccessibilitySettings');
+    setState(() {
+      _isLoading = false;
+      widget.onConnect(true);
+    });
   }
 
   @override
@@ -224,12 +230,11 @@ class _ConfigPageState extends State<ConfigPage> {
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('CẤU HÌNH VÀ CẤP QUYỀN', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const Text('CẤP QUYỀN HỆ THỐNG', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
-          const Text('Bấm lần lượt 3 nút dưới đây để cấp quyền cho App:', style: TextStyle(color: Colors.grey, fontSize: 13)),
+          const Text('Bấm lần lượt 3 nút dưới đây:', style: TextStyle(color: Colors.grey, fontSize: 13)),
           const SizedBox(height: 20),
           
-          // Nút 1: Quyền Overlay
           ElevatedButton.icon(
             onPressed: _requestOverlay,
             icon: const Icon(Icons.layers, color: Colors.black),
@@ -238,7 +243,6 @@ class _ConfigPageState extends State<ConfigPage> {
           ),
           const SizedBox(height: 15),
 
-          // Nút 2: Quyền VPN
           ElevatedButton.icon(
             onPressed: _requestVpn,
             icon: const Icon(Icons.vpn_lock, color: Colors.black),
@@ -247,7 +251,6 @@ class _ConfigPageState extends State<ConfigPage> {
           ),
           const SizedBox(height: 15),
 
-          // Nút 3: Quyền Trợ năng
           ElevatedButton.icon(
             onPressed: _openAccessibility,
             icon: const Icon(Icons.accessibility_new, color: Colors.black),
@@ -259,20 +262,8 @@ class _ConfigPageState extends State<ConfigPage> {
           const Divider(color: Colors.grey),
           const SizedBox(height: 20),
           
-          // Nút Kích hoạt tổng
           ElevatedButton(
-            onPressed: () async {
-              setState(() => _isLoading = true);
-              await platform.invokeMethod('startOverlay');
-              await platform.invokeMethod('startVpn');
-              if (_configController.text.isNotEmpty) {
-                await platform.invokeMethod('sendToV2rayNG', {'config': _configController.text});
-              }
-              setState(() {
-                _isLoading = false;
-                widget.onConnect(true);
-              });
-            },
+            onPressed: _isLoading || widget.isConnected ? null : _activateAll,
             style: ElevatedButton.styleFrom(
               backgroundColor: widget.isConnected ? Colors.green : const Color(0xFF00E5FF),
               minimumSize: const Size(double.infinity, 55),
