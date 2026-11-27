@@ -43,25 +43,6 @@ class MainActivity : FlutterActivity() {
                     }
                     result.success(true)
                 }
-                "sendToV2rayNG" -> {
-                    val config = call.argument<String>("config") ?: ""
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.setPackage("com.v2ray.ang")
-                        intent.data = Uri.parse(config)
-                        startActivity(intent)
-                        result.success(true)
-                    } catch (e: Exception) { result.success(false) }
-                }
-                "updateAimConfig" -> {
-                    val sens = call.argument<Double>("sensitivity")?.toFloat() ?: 1.8f
-                    val yMulti = call.argument<Double>("yMultiplier")?.toFloat() ?: 1.25f
-                    TouchService.getInstance()?.let {
-                        it.sensitivityMultiplier = sens
-                        it.yAxisMultiplier = yMulti
-                    }
-                    result.success(true)
-                }
                 "toggleAntiban" -> {
                     val enable = call.argument<Boolean>("enable") ?: true
                     val intent = Intent(this, BridgeVpnService::class.java)
