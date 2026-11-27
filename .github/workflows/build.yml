@@ -27,10 +27,11 @@ jobs:
         
       - name: Restore Custom Files
         run: |
-          rm -rf lib android
-          cp -r /tmp/custom/lib .
-          cp -r /tmp/custom/android .
-          cp /tmp/custom/pubspec.yaml .
+          cp /tmp/custom/lib/main.dart lib/main.dart
+          cp /tmp/custom/pubspec.yaml pubspec.yaml
+          cp /tmp/custom/android/app/src/main/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+          cp /tmp/custom/android/app/src/main/res/xml/accessibility_service_config.xml android/app/src/main/res/xml/accessibility_service_config.xml
+          cp /tmp/custom/android/app/src/main/kotlin/com/sgcodexs/menuaim/*.kt android/app/src/main/kotlin/com/sgcodexs/menuaim/
 
       - run: flutter pub get
       - run: flutter build apk --release
