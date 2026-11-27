@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:app_settings/app_settings.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.light));
@@ -213,10 +215,10 @@ class _ConfigPageState extends State<ConfigPage> {
           const Text('Bấm lần lượt 3 nút dưới đây:', style: TextStyle(color: Colors.grey, fontSize: 13)),
           const SizedBox(height: 20),
           
-          // Nút 1: Không dùng async/await để tránh kẹt UI
+          // Nút 1: Dùng thư viện app_settings
           ElevatedButton.icon(
-            onPressed: () {
-              platform.invokeMethod('requestOverlayPermission');
+            onPressed: () async {
+              await AppSettings.openAppSettings(type: AppSettingsType.overlay);
             },
             icon: const Icon(Icons.layers, color: Colors.black),
             label: const Text('1. CẤP QUYỀN VẼ TÂM (OVERLAY)', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
@@ -224,7 +226,7 @@ class _ConfigPageState extends State<ConfigPage> {
           ),
           const SizedBox(height: 15),
 
-          // Nút 2: Không dùng async/await
+          // Nút 2: Dùng Native cũ (VPN không có trong app_settings)
           ElevatedButton.icon(
             onPressed: () {
               platform.invokeMethod('startVpn');
@@ -235,10 +237,10 @@ class _ConfigPageState extends State<ConfigPage> {
           ),
           const SizedBox(height: 15),
 
-          // Nút 3: Không dùng async/await
+          // Nút 3: Dùng thư viện app_settings
           ElevatedButton.icon(
-            onPressed: () {
-              platform.invokeMethod('openAccessibilitySettings');
+            onPressed: () async {
+              await AppSettings.openAppSettings(type: AppSettingsType.accessibility);
             },
             icon: const Icon(Icons.accessibility_new, color: Colors.black),
             label: const Text('3. BẬT TRỢ NĂNG (KÉO TÂM)', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
