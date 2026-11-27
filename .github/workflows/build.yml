@@ -15,10 +15,10 @@ jobs:
           flutter-version: '3.13.0'
           channel: 'stable'
           
-      - name: Create Clean Project
+      - name: Tạo dự án Flutter chuẩn
         run: flutter create --project-name=menu_aim --org=com.sgcodexs .
         
-      - name: Tự động tạo pubspec.yaml chuẩn xác 100%
+      - name: Tự động tạo pubspec.yaml chuẩn
         run: |
           cat << 'EOF' > pubspec.yaml
           name: menu_aim
@@ -73,11 +73,10 @@ jobs:
           </manifest>
           EOF
 
-      - name: Sao chép code của bhai
+      - name: Copy code từ thư mục gốc vào dự án
         run: |
-          cp -r lib /tmp/lib_backup
-          cp -r android/app/src/main/kotlin/com/sgcodexs/menuaim/*.kt android/app/src/main/kotlin/com/sgcodexs/menuaim/
           cp lib/main.dart lib/main.dart || true
+          cp android/app/src/main/kotlin/com/sgcodexs/menuaim/*.kt android/app/src/main/kotlin/com/sgcodexs/menuaim/ || true
           cp android/app/src/main/res/xml/accessibility_service_config.xml android/app/src/main/res/xml/accessibility_service_config.xml || true
 
       - run: flutter pub get
