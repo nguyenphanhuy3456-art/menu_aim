@@ -15,22 +15,29 @@ jobs:
           flutter-version: '3.13.0'
           channel: 'stable'
           
-      - name: Save Custom Files
-        run: |
-          mkdir -p /tmp/custom
-          cp -r lib /tmp/custom/
-          cp -r android /tmp/custom/
-          cp pubspec.yaml /tmp/custom/
-          
       - name: Create Clean Project
         run: flutter create --project-name=menu_aim --org=com.sgcodexs .
         
-      - name: Restore Custom Files
+      - name: Tự động tạo pubspec.yaml chuẩn xác 100%
         run: |
-          cp /tmp/custom/lib/main.dart lib/main.dart
-          cp /tmp/custom/pubspec.yaml pubspec.yaml
-          cp /tmp/custom/android/app/src/main/res/xml/accessibility_service_config.xml android/app/src/main/res/xml/accessibility_service_config.xml
-          cp /tmp/custom/android/app/src/main/kotlin/com/sgcodexs/menuaim/*.kt android/app/src/main/kotlin/com/sgcodexs/menuaim/
+          cat << 'EOF' > pubspec.yaml
+          name: menu_aim
+          description: MENU AIM App
+          publish_to: 'none'
+          version: 1.0.0+1
+
+          environment:
+            sdk: '>=3.0.0 <4.0.0'
+
+          dependencies:
+            flutter:
+              sdk: flutter
+            permission_handler: ^11.0.1
+            app_settings: ^5.1.1
+
+          flutter:
+            uses-material-design: true
+          EOF
 
       - name: Tự động tạo AndroidManifest.xml hoàn hảo
         run: |
@@ -41,7 +48,6 @@ jobs:
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
               <uses-permission android:name="android.permission.BIND_VPN_SERVICE" />
               <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-              <uses-permission android:name="android.permission.ACTION_MANAGE_OVERLAY_PERMISSION" />
               <application android:label="MENU AIM" android:icon="@mipmap/ic_launcher" android:usesCleartextTraffic="true">
                   <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
                       <meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme" />
@@ -67,10 +73,12 @@ jobs:
           </manifest>
           EOF
 
-      - name: Tự động thêm thư viện vào pubspec.yaml
+      - name: Sao chép code của bhai
         run: |
-          echo "  permission_handler: ^11.0.1" >> pubspec.yaml
-          echo "  app_settings: ^5.1.1" >> pubspec.yaml
+          cp -r lib /tmp/lib_backup
+          cp -r android/app/src/main/kotlin/com/sgcodexs/menuaim/*.kt android/app/src/main/kotlin/com/sgcodexs/menuaim/
+          cp lib/main.dart lib/main.dart || true
+          cp android/app/src/main/res/xml/accessibility_service_config.xml android/app/src/main/res/xml/accessibility_service_config.xml || true
 
       - run: flutter pub get
       - run: flutter build apk --release
