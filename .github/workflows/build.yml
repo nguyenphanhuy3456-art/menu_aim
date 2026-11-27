@@ -15,19 +15,23 @@ jobs:
           flutter-version: '3.13.0'
           channel: 'stable'
           
-      - name: Tạo dự án Flutter chuẩn
+      - name: Save Custom Files
+        run: |
+          mkdir -p /tmp/custom
+          cp -r lib /tmp/custom/
+          cp -r android /tmp/custom/
+          cp pubspec.yaml /tmp/custom/
+          
+      - name: Create Clean Project
         run: flutter create --project-name=menu_aim --org=com.sgcodexs .
         
-      - name: Ghi đè code của bhai vào dự án
+      - name: Restore Custom Files
         run: |
-          cp lib/main.dart lib/main.dart
-          cp android/app/src/main/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
-          cp android/app/src/main/res/xml/accessibility_service_config.xml android/app/src/main/res/xml/accessibility_service_config.xml
-          cp android/app/src/main/kotlin/com/sgcodexs/menuaim/MainActivity.kt android/app/src/main/kotlin/com/sgcodexs/menuaim/MainActivity.kt
-          cp android/app/src/main/kotlin/com/sgcodexs/menuaim/AimOverlayService.kt android/app/src/main/kotlin/com/sgcodexs/menuaim/AimOverlayService.kt
-          cp android/app/src/main/kotlin/com/sgcodexs/menuaim/TouchService.kt android/app/src/main/kotlin/com/sgcodexs/menuaim/TouchService.kt
-          cp android/app/src/main/kotlin/com/sgcodexs/menuaim/BridgeVpnService.kt android/app/src/main/kotlin/com/sgcodexs/menuaim/BridgeVpnService.kt
-          
+          rm -rf lib android
+          cp -r /tmp/custom/lib .
+          cp -r /tmp/custom/android .
+          cp /tmp/custom/pubspec.yaml .
+
       - run: flutter pub get
       - run: flutter build apk --release
       - uses: actions/upload-artifact@v4
