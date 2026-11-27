@@ -205,41 +205,55 @@ class _ConfigPageState extends State<ConfigPage> {
 
   Future<void> _activateBridge() async {
     setState(() => _isLoading = true);
-    
-    try {
-      await platform.invokeMethod('requestOverlayPermission');
-      await platform.invokeMethod('startOverlay');
-      await platform.invokeMethod('startVpn');
-      
-      if (_configController.text.isNotEmpty) {
-        await platform.invokeMethod('sendToV2rayNG', {'config': _configController.text});
-      }
-
-      setState(() {
-        _isLoading = false;
-        widget.onConnect(true);
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
+    await platform.invokeMethod('startOverlay');
+    await platform.invokeMethod('startVpn');
+    if (_configController.text.isNotEmpty) {
+      await platform.invokeMethod('sendToV2rayNG', {'config': _configController.text});
     }
+    setState(() {
+      _isLoading = false;
+      widget.onConnect(true);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('CẤU HÌNH V2RAY BRIDGE', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const Text('CẤP QUYỀN HỆ THỐNG', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
-          const Text('Dán link VMess/VLESS để tối ưu kết nối.', style: TextStyle(color: Colors.grey, fontSize: 13)),
+          const Text('Bấm lần lượt 3 nút dưới đây để app có thể chạy ngầm:', style: TextStyle(color: Colors.grey, fontSize: 13)),
           const SizedBox(height: 20),
-          TextField(
-            controller: _configController, maxLines: 4,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
-            decoration: InputDecoration(hintText: 'vmess://... hoặc vless://...', hintStyle: const TextStyle(color: Colors.grey), filled: true, fillColor: const Color(0xFF141A27), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)),
+          
+          ElevatedButton.icon(
+            onPressed: () => platform.invokeMethod('requestOverlayPermission'),
+            icon: const Icon(Icons.layers, color: Colors.black),
+            label: const Text('1. CẤP QUYỀN VẼ TÂM (OVERLAY)', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E5FF), minimumSize: const Size(double.infinity, 50)),
           ),
+          const SizedBox(height: 15),
+
+          ElevatedButton.icon(
+            onPressed: () => platform.invokeMethod('startVpn'),
+            icon: const Icon(Icons.vpn_lock, color: Colors.black),
+            label: const Text('2. CẤP QUYỀN VPN (ANTIBAN)', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E5FF), minimumSize: const Size(double.infinity, 50)),
+          ),
+          const SizedBox(height: 15),
+
+          ElevatedButton.icon(
+            onPressed: () => platform.invokeMethod('openAccessibilitySettings'),
+            icon: const Icon(Icons.accessibility_new, color: Colors.black),
+            label: const Text('3. BẬT TRỢ NĂNG (KÉO TÂM)', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E5FF), minimumSize: const Size(double.infinity, 50)),
+          ),
+          
+          const SizedBox(height: 30),
+          const Divider(color: Colors.grey),
           const SizedBox(height: 20),
+          
           SizedBox(
             width: double.infinity, height: 55,
             child: ElevatedButton(
