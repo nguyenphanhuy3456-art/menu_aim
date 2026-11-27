@@ -71,7 +71,6 @@ class MainActivity : FlutterActivity() {
                 "hideApp" -> {
                     val enable = call.argument<Boolean>("enable") ?: true
                     if (enable) {
-                        // Chỉ dùng FLAG_SECURE để chống chụp ảnh màn hình (an toàn, không bị lỗi build)
                         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
                     }
                     result.success(true)
