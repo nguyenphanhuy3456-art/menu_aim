@@ -204,22 +204,26 @@ class _ConfigPageState extends State<ConfigPage> {
   static const platform = MethodChannel('com.sgcodexs.menuaim/native');
 
   Future<void> _activateBridge() async {
-    // XÓA DÒNG CHẶN LINK RỖNG Ở ĐÂY
     setState(() => _isLoading = true);
-    await platform.invokeMethod('requestOverlayPermission');
-    await Future.delayed(const Duration(seconds: 1));
-    bool overlayStarted = await platform.invokeMethod('startOverlay');
-    await platform.invokeMethod('startVpn');
     
-    // Chỉ gửi link nếu có
-    if (_configController.text.isNotEmpty) {
-      await platform.invokeMethod('sendToV2rayNG', {'config': _configController.text});
-    }
+    try {
+      await platform.invokeMethod('requestOverlayPermission');
+      
+      // Bỏ hoàn toàn thời gian chờ (Future.delayed) để chạy ngay lập tức
+      bool overlayStarted = await platform.invokeMethod('startOverlay');
+      await platform.invokeMethod('startVpn');
+      
+      if (_configController.text.isNotEmpty) {
+        await platform.invokeMethod('sendToV2rayNG', {'config': _configController.text});
+      }
 
-    setState(() {
-      _isLoading = false;
-      widget.onConnect(true);
-    });
+      setState(() {
+        _isLoading = false;
+        widget.onConnect(true);
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -243,7 +247,9 @@ class _ConfigPageState extends State<ConfigPage> {
             child: ElevatedButton(
               onPressed: _isLoading || widget.isConnected ? null : _activateBridge,
               style: ElevatedButton.styleFrom(backgroundColor: widget.isConnected ? Colors.green : const Color(0xFF00E5FF), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              child: _isLoading ? const CircularProgressIndicator(color: Colors.black) : Text(widget.isConnected ? 'ĐÃ KẾT NỐI (BRIDGE ON)' : 'KÍCH HOẠT CẦU NỐI', style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
+              child: _isLoading 
+                  ? const CircularProgressIndicator(color: Colors.black) 
+                  : Text(widget.isConnected ? 'ĐÃ KẾT NỐI (BRIDGE ON)' : 'KÍCH HOẠT CẦU NỐI', style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ),
         ]),
