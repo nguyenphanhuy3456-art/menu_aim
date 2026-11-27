@@ -204,16 +204,21 @@ class _ConfigPageState extends State<ConfigPage> {
   static const platform = MethodChannel('com.sgcodexs.menuaim/native');
 
   Future<void> _activateBridge() async {
-    if (_configController.text.isEmpty) return;
+    // XÓA DÒNG CHẶN LINK RỖNG Ở ĐÂY
     setState(() => _isLoading = true);
     await platform.invokeMethod('requestOverlayPermission');
     await Future.delayed(const Duration(seconds: 1));
     bool overlayStarted = await platform.invokeMethod('startOverlay');
     await platform.invokeMethod('startVpn');
-    bool v2raySent = await platform.invokeMethod('sendToV2rayNG', {'config': _configController.text});
+    
+    // Chỉ gửi link nếu có
+    if (_configController.text.isNotEmpty) {
+      await platform.invokeMethod('sendToV2rayNG', {'config': _configController.text});
+    }
+
     setState(() {
       _isLoading = false;
-      if (overlayStarted && v2raySent) widget.onConnect(true);
+      widget.onConnect(true);
     });
   }
 
