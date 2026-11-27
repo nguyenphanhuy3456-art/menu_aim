@@ -5,36 +5,36 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-java@v3
-      with:
-        distribution: 'zulu'
-        java-version: '12.x'
-    - uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.13.0'
-        channel: 'stable'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '12.x'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.0'
+          channel: 'stable'
+          
+      - name: Save Custom Files
+        run: |
+          mkdir -p /tmp/custom
+          cp -r lib /tmp/custom/
+          cp -r android /tmp/custom/
+          cp pubspec.yaml /tmp/custom/
+          
+      - name: Create Clean Project
+        run: flutter create --project-name=menu_aim --org=com.sgcodexs .
         
-    - name: Save Custom Files
-      run: |
-        mkdir -p /tmp/custom
-        cp -r lib /tmp/custom/
-        cp -r android /tmp/custom/
-        cp pubspec.yaml /tmp/custom/
-        
-    - name: Create Clean Project
-      run: flutter create --project-name=menu_aim --org=com.sgcodexs .
-      
-    - name: Restore Custom Files
-      run: |
-        rm -rf lib android
-        cp -r /tmp/custom/lib .
-        cp -r /tmp/custom/android .
-        cp /tmp/custom/pubspec.yaml .
+      - name: Restore Custom Files
+        run: |
+          rm -rf lib android
+          cp -r /tmp/custom/lib .
+          cp -r /tmp/custom/android .
+          cp /tmp/custom/pubspec.yaml .
 
-    - run: flutter pub get
-    - run: flutter build apk --release
-    - uses: actions/upload-artifact@v4
-      with:
-        name: menu-aim-apk
-        path: build/app/outputs/flutter-apk/app-release.apk
+      - run: flutter pub get
+      - run: flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: menu-aim-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
