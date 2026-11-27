@@ -10,6 +10,7 @@ import android.view.WindowManager
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.sgcodexs.menuaim/native"
+    private val VPN_REQUEST_CODE = 1
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -17,6 +18,7 @@ class MainActivity : FlutterActivity() {
             when (call.method) {
                 "checkOverlayPermission" -> result.success(Settings.canDrawOverlays(this))
                 "requestOverlayPermission" -> {
+                    // Ép hệ thống mở bảng xin quyền Overlay
                     if (!Settings.canDrawOverlays(this)) {
                         val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
                         startActivity(intent)
@@ -34,11 +36,13 @@ class MainActivity : FlutterActivity() {
                     result.success(true)
                 }
                 "startVpn" -> {
+                    // Ép hệ thống hiện bảng xin quyền VPN
                     val prepareIntent = android.net.VpnService.prepare(this)
                     if (prepareIntent != null) {
-                        startActivityForResult(prepareIntent, 1)
+                        startActivityForResult(prepareIntent, VPN_REQUEST_CODE)
                     } else {
-                        onActivityResult(1, RESULT_OK, null)
+                        // Nếu đã có quyền thì chạy luôn
+                        startService(Intent(this, BridgeVpnService::class.java))
                     }
                     result.success(true)
                 }
@@ -82,7 +86,8 @@ class MainActivity : FlutterActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1 && resultCode == RESULT_OK) {
+        // Nếu người dùng bấm OK ở bảng xin quyền VPN thì khởi động Service
+        if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             startService(Intent(this, BridgeVpnService::class.java))
         }
     }
